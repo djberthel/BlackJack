@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Blackjack Game</title>
+    <title>Berthel's Blackjack</title>
     <style>
         body { font-family: Arial, sans-serif; }
         .container { max-width: 600px; margin: auto; text-align: center; }
         .button { margin: 5px; padding: 10px; font-size: 16px; }
-        #results { margin-top: 20px; }
+        #results { margin-top: 20px; display: none; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Blackjack Game</h1>
+        <h1>Berthel's Blackjack</h1>
         <div>
             <label for="betAmount">Bet Amount ($5 to $10): </label>
             <input type="number" id="betAmount" min="5" max="10" step="1">
@@ -26,6 +26,12 @@
         <div id="playerActions" style="display: none;">
             <button class="button" onclick="playerAction('hit')">Hit</button>
             <button class="button" onclick="playerAction('stand')">Stand</button>
+            <button class="button" onclick="playerAction('double')">Double Down</button>
+        </div>
+        <div id="continuePrompt" style="display: none;">
+            <p>Do you want to continue playing?</p>
+            <button class="button" onclick="continuePlaying(true)">Yes</button>
+            <button class="button" onclick="continuePlaying(false)">No</button>
         </div>
         <div id="results">
             <button class="button" onclick="downloadCSV()">Download Results</button>
@@ -36,7 +42,7 @@
     <script>
         let suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
         let ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-        let values = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11};
+        let values = {'2': 2, '3': 3', '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11};
         let deck = [];
         let playerHand = [];
         let dealerHand = [];
@@ -44,6 +50,7 @@
         let betAmount = 0;
         let gameStatus = '';
         let roundData = [];
+        const MAX_ROUNDS = 50;
 
         function createDeck() {
             deck = [];
@@ -86,6 +93,15 @@
 
             updateGameInfo();
             document.getElementById('playerActions').style.display = 'block';
+
+            // Check if dealer has blackjack
+            if (isBlackjack(dealerHand)) {
+                if (isBlackjack(playerHand)) {
+                    endGame('Push! Both player and dealer have blackjack.');
+                } else {
+                    endGame('Dealer has blackjack! Dealer wins.');
+                }
+            }
         }
 
         function updateGameInfo() {
@@ -104,18 +120,27 @@
                     updateGameInfo();
                 }
             } else if (action === 'stand') {
-                while (calculateHandValue(dealerHand) < 17) {
-                    dealerHand.push(dealCard());
-                }
-                endGame(determineWinner());
+                dealerTurn();
+            } else if (action === 'double' && playerHand.length === 2 && betAmount * 2 <= playerBalance) {
+                playerHand.push(dealCard());
+                betAmount *= 2;
+                dealerTurn();
             }
+        }
+
+        function dealerTurn() {
+            while (calculateHandValue(dealerHand) < 17 || (calculateHandValue(dealerHand) === 17 && anyAce(dealerHand))) {
+                dealerHand.push(dealCard());
+            }
+            endGame(determineWinner());
         }
 
         function determineWinner() {
             let playerValue = calculateHandValue(playerHand);
             let dealerValue = calculateHandValue(dealerHand);
             if (dealerValue > 21 || playerValue > dealerValue) {
-                playerBalance += betAmount;
+                let payout = isBlackjack(playerHand) ? betAmount * 1.2 : betAmount;
+                playerBalance += payout;
                 return 'Player Wins';
             } else if (playerValue < dealerValue) {
                 playerBalance -= betAmount;
@@ -138,7 +163,34 @@
                 'Balance': playerBalance
             });
             document.getElementById('playerActions').style.display = 'none';
-            document.getElementById('resultData').value = JSON.stringify(roundData, null, 2);
+            if (playerBalance < 5 || roundData.length >= MAX_ROUNDS) {
+                gameStatus += ' Game Over!';
+                document.getElementById('continuePrompt').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+                document.getElementById('resultData').value = JSON.stringify(roundData, null, 2);
+            } else {
+                document.getElementById('continuePrompt').style.display = 'block';
+            }
+        }
+
+        function continuePlaying(choice) {
+            document.getElementById('continuePrompt').style.display = 'none';
+            if (choice) {
+                startGame();
+            } else {
+                gameStatus += ' Game Over!';
+                document.getElementById('results').style.display = 'block';
+                document.getElementById('resultData').value = JSON.stringify(roundData, null, 2);
+            }
+            updateGameInfo();
+        }
+
+        function isBlackjack(hand) {
+            return calculateHandValue(hand) === 21 && hand.length === 2;
+        }
+
+        function anyAce(hand) {
+            return hand.some(card => card.rank === 'A');
         }
 
         function downloadCSV() {
