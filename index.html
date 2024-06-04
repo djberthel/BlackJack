@@ -17,7 +17,7 @@
             <input type="number" id="betAmount" min="5" max="10" step="1">
             <button class="button" onclick="startGame()">Start Game</button>
         </div>
-        <div id="gameInfo">
+        <div id="gameInfo" style="display: none;">
             <p id="balance"></p>
             <p id="playerHand"></p>
             <p id="dealerHand"></p>
@@ -42,7 +42,7 @@
     <script>
         let suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
         let ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-        let values = {'2': 2, '3': 3', '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11};
+        let values = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11};
         let deck = [];
         let playerHand = [];
         let dealerHand = [];
@@ -92,6 +92,7 @@
             dealerHand = [dealCard(), dealCard()];
 
             updateGameInfo();
+            document.getElementById('gameInfo').style.display = 'block';
             document.getElementById('playerActions').style.display = 'block';
 
             // Check if dealer has blackjack
