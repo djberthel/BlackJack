@@ -137,10 +137,6 @@
             playerHand = [dealCard(), dealCard()];
             dealerHand = [dealCard(), dealCard()];
 
-            updateGameInfo();
-            document.getElementById('gameInfo').style.display = 'block';
-            document.getElementById('playerActions').style.display = 'block';
-
             // Check if dealer has blackjack
             if (isBlackjack(dealerHand)) {
                 if (isBlackjack(playerHand)) {
@@ -148,7 +144,18 @@
                 } else {
                     endGame('Dealer has blackjack! Dealer wins.');
                 }
+                return;
             }
+
+            // Check if player has blackjack
+            if (isBlackjack(playerHand)) {
+                endGame('Player has blackjack! Player wins.');
+                return;
+            }
+
+            updateGameInfo();
+            document.getElementById('gameInfo').style.display = 'block';
+            document.getElementById('playerActions').style.display = 'block';
         }
 
         function updateGameInfo() {
