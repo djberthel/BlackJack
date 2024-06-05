@@ -149,6 +149,7 @@
 
             // Check if player has blackjack
             if (isBlackjack(playerHand)) {
+                playerBalance += Math.floor(betAmount * 1.2); // 6 to 5 payout for player blackjack
                 endGame('Player has blackjack! Player wins.');
                 return;
             }
@@ -193,8 +194,7 @@
             let playerValue = calculateHandValue(playerHand);
             let dealerValue = calculateHandValue(dealerHand);
             if (dealerValue > 21 || playerValue > dealerValue) {
-                let payout = isBlackjack(playerHand) ? betAmount * 1.2 : betAmount;
-                playerBalance += payout;
+                playerBalance += betAmount; // even money payout for non-blackjack wins
                 return 'Player Wins';
             } else if (playerValue < dealerValue) {
                 playerBalance -= betAmount;
@@ -223,6 +223,7 @@
                 document.getElementById('results').style.display = 'block';
                 document.getElementById('resultData').value = JSON.stringify(roundData, null, 2);
             } else {
+                document.getElementById('continuePrompt').style.display
                 document.getElementById('continuePrompt').style.display = 'block';
             }
         }
