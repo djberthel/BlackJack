@@ -142,6 +142,7 @@
                 if (isBlackjack(playerHand)) {
                     endGame('Push! Both player and dealer have blackjack.');
                 } else {
+                    playerBalance -= betAmount; // lose bet if dealer has blackjack
                     endGame('Dealer has blackjack! Dealer wins.');
                 }
                 return;
@@ -170,6 +171,7 @@
             if (action === 'hit') {
                 playerHand.push(dealCard());
                 if (calculateHandValue(playerHand) > 21) {
+                    playerBalance -= betAmount; // lose bet if player busts
                     endGame('Player Busts');
                 } else {
                     updateGameInfo();
