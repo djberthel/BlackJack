@@ -58,7 +58,7 @@
 <body>
     <div class="container">
         <h1>Berthel's Blackjack</h1>
-        <div>
+        <div id="bettingDiv">
             <label for="betAmount">Bet Amount ($5 to $10): </label>
             <input type="number" id="betAmount" min="5" max="10" step="1">
             <button class="button" onclick="startGame()">Start Game</button>
@@ -127,12 +127,15 @@
         }
 
         function startGame() {
+            gameStatus = ''; // Clear the game status for the new game
             betAmount = parseInt(document.getElementById('betAmount').value);
             if (betAmount < 5 || betAmount > 10 || betAmount > playerBalance) {
                 alert("Invalid bet amount. Please enter a bet between $5 and $10.");
                 return;
             }
 
+            document.getElementById('betAmount').disabled = true;
+            document.getElementById('bettingDiv').style.display = 'none';
             createDeck();
             playerHand = [dealCard(), dealCard()];
             dealerHand = [dealCard(), dealCard()];
@@ -179,15 +182,17 @@
             } else if (action === 'stand') {
                 dealerTurn();
             } else if (action === 'double' && playerHand.length === 2 && betAmount * 2 <= playerBalance) {
-                playerHand.push(dealCard());
                 betAmount *= 2;
-                dealerTurn();
+                playerHand.push(dealCard());
+                dealerTurn(true); // Double down means the player gets one card and stands
             }
         }
 
-        function dealerTurn() {
-            while (calculateHandValue(dealerHand) < 17 || (calculateHandValue(dealerHand) === 17 && anyAce(dealerHand))) {
-                dealerHand.push(dealCard());
+        function dealerTurn(doubleDown = false) {
+            if (!doubleDown) {
+                while (calculateHandValue(dealerHand) < 17 || (calculateHandValue(dealerHand) === 17 && anyAce(dealerHand))) {
+                    dealerHand.push(dealCard());
+                }
             }
             endGame(determineWinner());
         }
@@ -232,7 +237,8 @@
         function continuePlaying(choice) {
             document.getElementById('continuePrompt').style.display = 'none';
             if (choice) {
-                startGame();
+                document.getElementById('betAmount').disabled = false;
+                document.getElementById('bettingDiv').style.display = 'block';
             } else {
                 gameStatus += ' Game Over!';
                 document.getElementById('results').style.display = 'block';
