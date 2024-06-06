@@ -59,8 +59,8 @@
         <h1>Berthel's Blackjack</h1>
         <div id="bettingDiv">
             <p>Choose your bet:</p>
-            <button class="button" onclick="setBetAmount(5)">Bet $5</button>
-            <button class="button" onclick="setBetAmount(10)">Bet $10</button>
+            <button class="button" onclick="setBetAmount(5)" id="bet5">Bet $5</button>
+            <button class="button" onclick="setBetAmount(10)" id="bet10">Bet $10</button>
         </div>
         <div id="gameInfo" style="display: none;">
             <p id="playerHand"></p>
@@ -70,6 +70,7 @@
         <div id="playerActions" style="display: none;">
             <button class="button" onclick="playerAction('hit')">Hit</button>
             <button class="button" onclick="playerAction('stand')">Stand</button>
+            <button class="button" onclick="playerAction('double')">Double Down</button>
         </div>
         <div id="continuePrompt" style="display: none;">
             <p>Do you want to continue playing?</p>
@@ -124,10 +125,12 @@
         }
 
         function setBetAmount(amount) {
-            betAmount = amount;
-            playerBalance -= betAmount; // Deduct the bet amount immediately
-            updateGameInfo();
-            startGame();
+            if (betAmount === 0) { // Ensure bet can only be placed once per round
+                betAmount = amount;
+                playerBalance -= betAmount; // Deduct the bet amount immediately
+                updateGameInfo();
+                startGame();
+            }
         }
 
         function startGame() {
@@ -177,10 +180,15 @@
                 }
             } else if (action === 'stand') {
                 dealerTurn();
+            } else if (action === 'double' && playerHand.length === 2 && betAmount * 2 <= playerBalance) {
+                playerBalance -= betAmount; // Deduct additional bet amount for double down
+                betAmount *= 2;
+                playerHand.push(dealCard());
+                dealerTurn(true); // Double down means the player gets one card and stands
             }
         }
 
-        function dealerTurn() {
+        function dealerTurn(doubleDown = false) {
             while (calculateHandValue(dealerHand) < 17 || (calculateHandValue(dealerHand) === 17 && anyAce(dealerHand))) {
                 dealerHand.push(dealCard());
             }
@@ -214,6 +222,7 @@
                 'Balance': playerBalance
             });
             document.getElementById('playerActions').style.display = 'none';
+            betAmount = 0; // Reset bet amount for the next round
             if (playerBalance < 5 || roundData.length >= MAX_ROUNDS) {
                 gameStatus += ' Game Over!';
                 document.getElementById('continuePrompt').style.display = 'none';
