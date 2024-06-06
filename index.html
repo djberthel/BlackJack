@@ -104,6 +104,7 @@
                 }
             }
             deck.sort(() => Math.random() - 0.5);
+            console.log('Deck created and shuffled:', deck);
         }
 
         function calculateHandValue(hand) {
@@ -117,7 +118,9 @@
         }
 
         function dealCard() {
-            return deck.pop();
+            let card = deck.pop();
+            console.log('Dealt card:', card);
+            return card;
         }
 
         function displayHand(hand) {
@@ -125,11 +128,13 @@
         }
 
         function setBetAmount(amount) {
+            console.log('Setting bet amount to:', amount);
             betAmount = amount;
             startGame();
         }
 
         function startGame() {
+            console.log('Starting game with bet amount:', betAmount);
             gameStatus = ''; // Clear the game status for the new game
             updateGameInfo();
             document.getElementById('bettingDiv').style.display = 'none';
@@ -161,6 +166,7 @@
         }
 
         function updateGameInfo() {
+            console.log('Updating game info');
             document.getElementById('balance').textContent = `Balance: $${playerBalance}`;
             document.getElementById('playerHand').textContent = `Player Hand: ${displayHand(playerHand)} (Value: ${calculateHandValue(playerHand)})`;
             document.getElementById('dealerHand').textContent = `Dealer Hand: ${dealerHand[0].rank} of ${dealerHand[0].suit} | ? of ?`;
@@ -168,6 +174,7 @@
         }
 
         function playerAction(action) {
+            console.log('Player action:', action);
             if (action === 'hit') {
                 playerHand.push(dealCard());
                 if (calculateHandValue(playerHand) > 21) {
@@ -186,6 +193,7 @@
         }
 
         function dealerTurn(doubleDown = false) {
+            console.log('Dealer turn. Double down:', doubleDown);
             if (!doubleDown) {
                 while (calculateHandValue(dealerHand) < 17 || (calculateHandValue(dealerHand) === 17 && anyAce(dealerHand))) {
                     dealerHand.push(dealCard());
@@ -197,6 +205,7 @@
         function determineWinner() {
             let playerValue = calculateHandValue(playerHand);
             let dealerValue = calculateHandValue(dealerHand);
+            console.log('Determining winner. Player value:', playerValue, 'Dealer value:', dealerValue);
             if (dealerValue > 21 || playerValue > dealerValue) {
                 playerBalance += betAmount; // even money payout for non-blackjack wins
                 return 'Player Wins';
@@ -209,6 +218,7 @@
         }
 
         function endGame(result) {
+            console.log('Ending game. Result:', result);
             gameStatus = result;
             updateGameInfo();
             document.getElementById('dealerHand').textContent = `Dealer Hand: ${displayHand(dealerHand)} (Value: ${calculateHandValue(dealerHand)})`;
@@ -232,6 +242,7 @@
         }
 
         function continuePlaying(choice) {
+            console.log('Continuing playing. Choice:', choice);
             document.getElementById('continuePrompt').style.display = 'none';
             if (choice) {
                 gameStatus = ''; // Clear the game status for the new game
