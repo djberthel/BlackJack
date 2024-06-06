@@ -45,26 +45,24 @@
             margin-top: 20px;
             display: none;
         }
-        input[type="number"] {
-            padding: 5px;
-            font-size: 16px;
-            width: 80px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            margin-right: 10px;
+        #balance {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2em;
         }
     </style>
 </head>
 <body>
+    <div id="balance">Balance: $50</div>
     <div class="container">
         <h1>Berthel's Blackjack</h1>
         <div id="bettingDiv">
-            <label for="betAmount">Bet Amount ($5 to $10): </label>
-            <input type="number" id="betAmount" min="5" max="10" step="1">
-            <button class="button" onclick="startGame()">Start Game</button>
+            <p>Choose your bet:</p>
+            <button class="button" onclick="setBetAmount(5)">Bet $5</button>
+            <button class="button" onclick="setBetAmount(10)">Bet $10</button>
         </div>
         <div id="gameInfo" style="display: none;">
-            <p id="balance"></p>
             <p id="playerHand"></p>
             <p id="dealerHand"></p>
             <p id="gameStatus"></p>
@@ -126,15 +124,14 @@
             return hand.map(card => `${card.rank} of ${card.suit}`).join(' | ');
         }
 
+        function setBetAmount(amount) {
+            betAmount = amount;
+            startGame();
+        }
+
         function startGame() {
             gameStatus = ''; // Clear the game status for the new game
-            betAmount = parseInt(document.getElementById('betAmount').value);
-            if (betAmount < 5 || betAmount > 10 || betAmount > playerBalance) {
-                alert("Invalid bet amount. Please enter a bet between $5 and $10.");
-                return;
-            }
-
-            document.getElementById('betAmount').disabled = true;
+            updateGameInfo();
             document.getElementById('bettingDiv').style.display = 'none';
             createDeck();
             playerHand = [dealCard(), dealCard()];
@@ -237,7 +234,7 @@
         function continuePlaying(choice) {
             document.getElementById('continuePrompt').style.display = 'none';
             if (choice) {
-                document.getElementById('betAmount').disabled = false;
+                gameStatus = ''; // Clear the game status for the new game
                 document.getElementById('bettingDiv').style.display = 'block';
             } else {
                 gameStatus += ' Game Over!';
