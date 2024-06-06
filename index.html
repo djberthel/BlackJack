@@ -223,7 +223,6 @@
                 document.getElementById('results').style.display = 'block';
                 document.getElementById('resultData').value = JSON.stringify(roundData, null, 2);
             } else {
-                document.getElementById('continuePrompt').style.display
                 document.getElementById('continuePrompt').style.display = 'block';
             }
         }
@@ -241,7 +240,10 @@
         }
 
         function isBlackjack(hand) {
-            return calculateHandValue(hand) === 21 && hand.length === 2;
+            return hand.length === 2 && (
+                (hand[0].rank === 'A' && ['10', 'J', 'Q', 'K'].includes(hand[1].rank)) ||
+                (hand[1].rank === 'A' && ['10', 'J', 'Q', 'K'].includes(hand[0].rank))
+            );
         }
 
         function anyAce(hand) {
