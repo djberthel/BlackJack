@@ -5,7 +5,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(to right, #0b3d0b, #1c1c1c);
+            background: linear-gradient(to right, #062d06, #1c1c1c);
             color: #ffffff;
             margin: 0;
             padding: 0;
@@ -49,7 +49,7 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            font-size: 1.2em;
+            font-size: 1.5em;
         }
     </style>
 </head>
@@ -130,6 +130,8 @@
         function setBetAmount(amount) {
             console.log('Setting bet amount to:', amount);
             betAmount = amount;
+            playerBalance -= betAmount; // Deduct the bet amount immediately
+            updateGameInfo();
             startGame();
         }
 
@@ -147,7 +149,6 @@
                 if (isBlackjack(playerHand)) {
                     endGame('Push! Both player and dealer have blackjack.');
                 } else {
-                    playerBalance -= betAmount; // lose bet if dealer has blackjack
                     endGame('Dealer has blackjack! Dealer wins.');
                 }
                 return;
@@ -155,7 +156,7 @@
 
             // Check if player has blackjack
             if (isBlackjack(playerHand)) {
-                playerBalance += Math.floor(betAmount * 1.2); // 6 to 5 payout for player blackjack
+                playerBalance += Math.floor(betAmount * 2.2); // 6 to 5 payout for player blackjack
                 endGame('Player has blackjack! Player wins.');
                 return;
             }
@@ -178,7 +179,6 @@
             if (action === 'hit') {
                 playerHand.push(dealCard());
                 if (calculateHandValue(playerHand) > 21) {
-                    playerBalance -= betAmount; // lose bet if player busts
                     endGame('Player Busts');
                 } else {
                     updateGameInfo();
@@ -186,6 +186,7 @@
             } else if (action === 'stand') {
                 dealerTurn();
             } else if (action === 'double' && playerHand.length === 2 && betAmount * 2 <= playerBalance) {
+                playerBalance -= betAmount; // Deduct additional bet amount for double down
                 betAmount *= 2;
                 playerHand.push(dealCard());
                 dealerTurn(true); // Double down means the player gets one card and stands
@@ -207,12 +208,12 @@
             let dealerValue = calculateHandValue(dealerHand);
             console.log('Determining winner. Player value:', playerValue, 'Dealer value:', dealerValue);
             if (dealerValue > 21 || playerValue > dealerValue) {
-                playerBalance += betAmount; // even money payout for non-blackjack wins
+                playerBalance += betAmount * 2; // even money payout for non-blackjack wins
                 return 'Player Wins';
             } else if (playerValue < dealerValue) {
-                playerBalance -= betAmount;
                 return 'Dealer Wins';
             } else {
+                playerBalance += betAmount; // return the bet amount for a tie
                 return 'Tie';
             }
         }
