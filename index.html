@@ -51,6 +51,9 @@
             right: 10px;
             font-size: 1.5em;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -59,25 +62,30 @@
         <h1>Berthel's Blackjack</h1>
         <div id="bettingDiv">
             <p>Choose your bet:</p>
-            <button class="button" onclick="setBetAmount(5)" id="bet5">Bet $5</button>
-            <button class="button" onclick="setBetAmount(10)" id="bet10">Bet $10</button>
+            <form id="betForm" onsubmit="setBetAmount(); return false;">
+                <input type="radio" id="bet5" name="bet" value="5">
+                <label for="bet5">Bet $5</label><br>
+                <input type="radio" id="bet10" name="bet" value="10">
+                <label for="bet10">Bet $10</label><br>
+                <input type="submit" class="button" value="Place Bet">
+            </form>
         </div>
-        <div id="gameInfo" style="display: none;">
+        <div id="gameInfo" class="hidden">
             <p id="playerHand"></p>
             <p id="dealerHand"></p>
             <p id="gameStatus"></p>
         </div>
-        <div id="playerActions" style="display: none;">
+        <div id="playerActions" class="hidden">
             <button class="button" onclick="playerAction('hit')">Hit</button>
             <button class="button" onclick="playerAction('stand')">Stand</button>
             <button class="button" onclick="playerAction('double')">Double Down</button>
         </div>
-        <div id="continuePrompt" style="display: none;">
+        <div id="continuePrompt" class="hidden">
             <p>Do you want to continue playing?</p>
             <button class="button" onclick="continuePlaying(true)">Yes</button>
             <button class="button" onclick="continuePlaying(false)">No</button>
         </div>
-        <div id="results">
+        <div id="results" class="hidden">
             <button class="button" onclick="downloadCSV()">Download Results</button>
             <textarea id="resultData" rows="10" cols="50" readonly></textarea>
         </div>
@@ -124,19 +132,21 @@
             return hand.map(card => `${card.rank} of ${card.suit}`).join(' | ');
         }
 
-        function setBetAmount(amount) {
-            if (betAmount === 0) { // Ensure bet can only be placed once per round
-                betAmount = amount;
-                playerBalance -= betAmount; // Deduct the bet amount immediately
+        function setBetAmount() {
+            const betForm = document.getElementById('betForm');
+            const bet = betForm.elements['bet'].value;
+            if (bet) {
+                betAmount = parseInt(bet, 10);
+                playerBalance -= betAmount;
                 updateGameInfo();
                 startGame();
             }
         }
 
         function startGame() {
-            gameStatus = ''; // Clear the game status for the new game
+            gameStatus = '';
             updateGameInfo();
-            document.getElementById('bettingDiv').style.display = 'none';
+            document.getElementById('bettingDiv').classList.add('hidden');
             createDeck();
             playerHand = [dealCard(), dealCard()];
             dealerHand = [dealCard(), dealCard()];
@@ -159,8 +169,8 @@
             }
 
             updateGameInfo();
-            document.getElementById('gameInfo').style.display = 'block';
-            document.getElementById('playerActions').style.display = 'block';
+            document.getElementById('gameInfo').classList.remove('hidden');
+            document.getElementById('playerActions').classList.remove('hidden');
         }
 
         function updateGameInfo() {
@@ -181,10 +191,10 @@
             } else if (action === 'stand') {
                 dealerTurn();
             } else if (action === 'double' && playerHand.length === 2 && betAmount * 2 <= playerBalance) {
-                playerBalance -= betAmount; // Deduct additional bet amount for double down
+                playerBalance -= betAmount;
                 betAmount *= 2;
                 playerHand.push(dealCard());
-                dealerTurn(true); // Double down means the player gets one card and stands
+                dealerTurn(true);
             }
         }
 
@@ -201,12 +211,12 @@
             let playerValue = calculateHandValue(playerHand);
             let dealerValue = calculateHandValue(dealerHand);
             if (dealerValue > 21 || playerValue > dealerValue) {
-                playerBalance += betAmount * 2; // even money payout for non-blackjack wins
+                playerBalance += betAmount * 2;
                 return 'Player Wins';
             } else if (playerValue < dealerValue) {
                 return 'Dealer Wins';
             } else {
-                playerBalance += betAmount; // return the bet amount for a tie
+                playerBalance += betAmount;
                 return 'Tie';
             }
         }
@@ -223,26 +233,26 @@
                 'Result': result,
                 'Balance': playerBalance
             });
-            document.getElementById('playerActions').style.display = 'none';
-            betAmount = 0; // Reset bet amount for the next round
+            document.getElementById('playerActions').classList.add('hidden');
+            betAmount = 0;
             if (playerBalance < 5 || roundData.length >= MAX_ROUNDS) {
                 gameStatus += ' Game Over!';
-                document.getElementById('continuePrompt').style.display = 'none';
-                document.getElementById('results').style.display = 'block';
+                document.getElementById('continuePrompt').classList.add('hidden');
+                document.getElementById('results').classList.remove('hidden');
                 document.getElementById('resultData').value = JSON.stringify(roundData, null, 2);
             } else {
-                document.getElementById('continuePrompt').style.display = 'block';
+                document.getElementById('continuePrompt').classList.remove('hidden');
             }
         }
 
         function continuePlaying(choice) {
-            document.getElementById('continuePrompt').style.display = 'none';
+            document.getElementById('continuePrompt').classList.add('hidden');
             if (choice) {
-                gameStatus = ''; // Clear the game status for the new game
-                document.getElementById('bettingDiv').style.display = 'block';
+                gameStatus = '';
+                document.getElementById('bettingDiv').classList.remove('hidden');
             } else {
                 gameStatus += ' Game Over!';
-                document.getElementById('results').style.display = 'block';
+                document.getElementById('results').classList.remove('hidden');
                 document.getElementById('resultData').value = JSON.stringify(roundData, null, 2);
             }
             updateGameInfo();
